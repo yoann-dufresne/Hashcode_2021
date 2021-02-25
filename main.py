@@ -80,6 +80,9 @@ class Solution:
 
     self.cycles = {}
 
+  def __str__(self):
+    return f"{self.score} {self.best_score} - {self.cycles}"
+
   def get_score(self):
     return self.score
 
