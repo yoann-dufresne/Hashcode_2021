@@ -104,6 +104,8 @@ class Solution:
                 cycles[street][time] = True
                 time += 1
     def is_light_on(street,T):
+        if street not in cycles_lens:
+            return False
         cycle_len = cycles_lens[street]
         cycle = cycles[street]
         pos = T % cycle_len
