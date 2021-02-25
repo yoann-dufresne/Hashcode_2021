@@ -5,10 +5,7 @@ import glob
 import os
 import random
 
-import networkx as nx
-
 from model import *
-
 
 
 overall_best_score = 0
@@ -63,9 +60,6 @@ def parse(filename):
         paths += [line.split()[1:]]
     assert(len(paths) == V)
 parse(sys.argv[1])
-print(sys.argv[1],D,"secs",I,"intersections",S,"streets",V,"cars",F,"bonus",sep='\t')
-print(streets)
-print(paths)
 
 
 
@@ -88,9 +82,12 @@ class Solution:
     if self.get_score() >= overall_best_score:
       print("saved", self.get_score())
       with open(sys.argv[1] + "_" + str(self.get_score()) + "_.out", "w") as fp:
-        ### Complete HERE
-        print("solution content", file=fp)
-        ### 
+        print(len(self.cycles), file=fp)
+        for i, cycle in self.cycles.items():
+          print(i, file=fp)
+          print(len(cycle), file=fp)
+          for street, time in cycle:
+            print(street, time, file=fp)
     else:
       print("not saved", self.get_score())
 
@@ -103,15 +100,18 @@ def naive_solution():
   for i, tup in intersections.items():
     sol.cycles[i] = [(x, 1) for x in tup[0]]
 
-  print(sol.cycles)
+  # print(sol.cycles)
   return sol
+
+
+def greedy_cars
 
 
 
 
 def main():
   sol = naive_solution()
-  # sol.save()
+  sol.save()
 
   # Store cars
   cars = []
