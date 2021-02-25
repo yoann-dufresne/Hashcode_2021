@@ -20,3 +20,11 @@ class Street: # edge - maybe useless
         self.length = length
         self.queue = []
         self.tl = TrafficLight(0)
+
+# the scheduling of a single intersection
+class InterSchedule:
+    def __init__(self, inter, streets, time):
+        self.inter=inter # intersection ID
+        self.streets=streets # list of streets in the order of the schedule
+        self.time=time # list of times corresponding to the streets
+
