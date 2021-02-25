@@ -3,7 +3,7 @@ class Car:
         self.path = path
         self.state = False # T/F: moving/queued
         self.time = 0
-        self.max_score = 0
+        self.min_time = sum([p[1] for p in path])
 
 class TrafficLight:
     def __init__(self, time):

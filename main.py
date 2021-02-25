@@ -4,6 +4,7 @@ import sys
 import glob
 import os
 import random
+import networkx as nx
 
 from model import *
 
@@ -28,18 +29,22 @@ D, I, S, V, F = 0, 0, 0, 0, 0
 streets = []
 paths = []
 intersections = {}
+street_map = {}
+cars = []
 def parse(filename):
     lines = open(filename).readlines()
     global D,I,S,V,F
     D,I,S,V,F = map(int,lines[0].split())
    
-    global streets
+    global streets, street_map
     streets = []
+    street_map = {}
     for line in lines[1:S+1]:
         assert(len(line.split()) == 4)
         B,E, name, L = line.split()
         B,E,L=map(int,[B,E,L])
         streets += [(B,E,name,L)]
+        street_map[name] = (B,E,name,L)
     assert(len(streets) == S)
 
     global intersections
@@ -54,10 +59,12 @@ def parse(filename):
 
        
     global paths
+    global cars
     for line in lines[S+1:]:
         P = int(line.split()[0])
         assert(len(line.split()) == P+1)
-        paths += [line.split()[1:]]
+        paths += [[(s, street_map[s][3]) for s in line.strip().split()[1:]]]
+        cars.append(Car(paths[-1]))
     assert(len(paths) == V)
 parse(sys.argv[1])
 
@@ -104,14 +111,36 @@ def naive_solution():
   return sol
 
 
-def greedy_cars
+def greedy_cars():
+  global cars, street_map, intersections
 
+  # Compute hot points
+  busyness = {s:0 for s in street_map.keys()}
+  for car in cars:
+    for street, _ in car.path:
+      busyness[street] += 1
 
+  # For each intersection determine the cycle regarding the busyness
+  sol = Solution()
+  for i, tup in intersections.items():
+    inputs = tup[0]
+    local_busy = [busyness[street] for street in inputs if busyness[street] > 0]
+    # print(local_busy)
+    if len(local_busy) == 0:
+      continue
+
+    busy_min = min(local_busy)
+    sol.cycles[i] = [(street, round(busyness[street]/busy_min)) for street in inputs if busyness[street] > 0]
+    # print(sol.cycles[i])
+
+  return sol
 
 
 def main():
-  sol = naive_solution()
+  greedy_cars()
+  sol = greedy_cars()
   sol.save()
+  # exit(0)
 
   # Store cars
   cars = []
