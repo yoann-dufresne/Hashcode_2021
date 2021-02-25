@@ -5,6 +5,10 @@ import glob
 import os
 import random
 
+import networkx as nx
+
+from model import *
+
 
 
 overall_best_score = 0
@@ -109,6 +113,19 @@ def main():
   sol = naive_solution()
   # sol.save()
 
+  # Store cars
+  cars = []
+  for path in paths:
+    cars.append(Car(path))
+
+  # Store graph
+  G = nx.DiGraph()
+  # Nodes:
+  for inter_idx in set(street[0] for street in streets) | set(street[1] for street in streets):
+    G.add_node(inter_idx, data = Intersection(inter_idx))
+  # Edges:
+  for sinter, einter, name, length in streets:
+    G.add_edge(sinter, einter, label = name, weight = length)
 
 
 
