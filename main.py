@@ -180,9 +180,35 @@ def greedy_cars():
 
   # Compute hot points
   busyness = {s:0 for s in street_map.keys()}
+  car_counts = {s:0 for s in street_map.keys()}
+  sorted_cars = sorted([c.min_time for c in cars])
+  # print("][".join([str(x) for x in sorted_cars]))
   for car in cars:
-    for street, _ in car.path:
-      busyness[street] += 1
+    for street, length in car.path[:-1]:
+      busyness[street] += 1 / length
+      car_counts[street] += 1
+
+
+  car_incluence = []
+  for car in cars:
+    influence = 0
+    for street, length in car.path[:-1]:
+      if car_counts[street] == 1 and len(intersections[street_map[street][1]][0]) > 1:
+        influence += 1
+
+    car_incluence.append(influence)
+  # print(car_incluence)
+  print(sum(car_incluence)/len(car_incluence))
+  threshold = sorted(car_incluence, reverse=True)[:3]
+  print(threshold)
+  threshold = threshold[-1]
+
+  problem_cars = [c for i,c in enumerate(cars) if car_incluence[i] < threshold]
+
+  # remove cars
+  for c in problem_cars:
+    for street, length in car.path[:-1]:
+      busyness[street] -= 1 / length
 
   # For each intersection determine the cycle regarding the busyness
   sol = Solution()
@@ -194,8 +220,10 @@ def greedy_cars():
       continue
 
     busy_min = min(local_busy)
-    sol.cycles[i] = [(street, round(busyness[street]/busy_min)) for street in inputs if busyness[street] > 0]
-    #print(sol.cycles[i])
+
+    sol.cycles[i] = [(street, round(min(1, busyness[street]/busy_min))) for street in inputs if busyness[street] > 0]
+    random.shuffle(sol.cycles[i])
+    # print(sol.cycles[i])
 
   return sol
 
@@ -217,10 +245,9 @@ def edit_singletl_time(solution, intidx, streetname, value):
 
 
 def main():
-  greedy_cars()
   sol = greedy_cars()
   sol.save()
-  # exit(0)
+  exit(0)
 
   # Store cars
   cars = []
