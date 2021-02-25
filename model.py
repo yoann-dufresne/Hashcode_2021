@@ -9,6 +9,7 @@ class TrafficLight:
     def __init__(self, time):
         self.state = True # T/F: green/red
         self.time = time
+        self.elapsed = 0 # time passed since becoming green
 
 class Intersection: # node
     def __init__(self, idx):
@@ -26,5 +27,6 @@ class InterSchedule:
     def __init__(self, inter, streets, time):
         self.inter=inter # intersection ID
         self.streets=streets # list of streets in the order of the schedule
+        # the following could be redundant
         self.time=time # list of times corresponding to the streets
 
