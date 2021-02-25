@@ -5,7 +5,8 @@ import glob
 import os
 import random
 import networkx as nx
-
+from collections import defaultdict
+from copy import deepcopy
 from model import *
 
 
@@ -80,13 +81,74 @@ class Solution:
 
     self.cycles = {}
 
-  def get_score(self):
-    return self.score
+  def get_score(self,verbose=False):
+    # gather queue at each street extremity
+    street_lqueue = defaultdict(list)
+    lights = defaultdict()
+    cars_copy = deepcopy(cars)
+    # make all cars be at the extremity of their street to start sim
+    for car in cars_copy:
+        car.street = car.path[0][0]
+        car.time = car.path[0][1]
+        street_lqueue[car.street] += [car]
+    # set the light pattern
+    cycles = defaultdict()
+    cycles_lens = defaultdict()
+    for i in self.cycles:
+        time = 0
+        cycle_len = sum([d for s,d in self.cycles[i]])
+        for street, duration in self.cycles[i]:
+            cycles_lens[street] = cycle_len
+            cycles[street] = [False] * cycle_len
+            for _ in range(duration):
+                cycles[street][time] = True
+                time += 1
+    def is_light_on(street,T):
+        cycle_len = cycles_lens[street]
+        cycle = cycles[street]
+        pos = T % cycle_len
+        return cycle[pos]
+    # now advance cars whenever possible
+    score = 0
+    for T in range(D):
+        if verbose:
+            print("T=",T)
+        for car in cars_copy:
+            if car.done: continue
+            street = car.street
+            #print(street)
+            # move the car
+            car.time += 1
+            # add car to street queue if its time has come
+            L = street_map[street][3]
+            if car.time == L:
+                street_lqueue[street] += [car]
+            # see if it is waiting for the light
+            if len(street_lqueue[street]) > 0 and car == street_lqueue[street][0]:
+                # move car to next street, if possible, otherwise it waits
+                if is_light_on(street,T):
+                    street_lqueue[street] = street_lqueue[street][1:]
+                    #print("path",car.path)
+                    if len(car.path) == 1:
+                        # car is done! add to score
+                        if verbose:
+                            print("car is done!",score)
+                        car.done = True
+                        score += F + D - T
+                    else:
+                        new_street = car.path[1][0]
+                        #print("moving car from",street,"to",new_street)
+                        car.path = car.path[1:] # modifies the car path..
+                        car.street = car.path[0][0]
+                        car.time = 0
+    return score
+            
+
 
   def save(self):
     global overall_best_score
 
-    if self.get_score() >= overall_best_score:
+    if self.get_score(verbose=True) >= overall_best_score:
       print("saved", self.get_score())
       with open(sys.argv[1] + "_" + str(self.get_score()) + "_.out", "w") as fp:
         print(len(self.cycles), file=fp)
@@ -131,7 +193,7 @@ def greedy_cars():
 
     busy_min = min(local_busy)
     sol.cycles[i] = [(street, round(busyness[street]/busy_min)) for street in inputs if busyness[street] > 0]
-    # print(sol.cycles[i])
+    #print(sol.cycles[i])
 
   return sol
 

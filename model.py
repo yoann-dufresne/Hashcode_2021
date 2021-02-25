@@ -4,6 +4,7 @@ class Car:
         self.state = False # T/F: moving/queued
         self.time = 0
         self.min_time = sum([p[1] for p in path])
+        self.done = False
 
 class TrafficLight:
     def __init__(self, time):
