@@ -38,7 +38,9 @@ class Solution:
     if self.get_score() >= overall_best_score:
       print("saved", self.get_score())
       with open(sys.argv[1] + "_" + str(self.get_score()) + "_.out", "w") as fp:
+        ### Complete HERE
         print("solution content", file=fp)
+        ### 
     else:
       print("not saved", self.get_score())
 
