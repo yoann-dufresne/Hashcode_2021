@@ -90,7 +90,7 @@ class Solution:
     for car in cars_copy:
         car.street = car.path[0][0]
         car.time = car.path[0][1]
-        street_lqueue[car.street] += [car]
+        street_lqueue[car.street] = [car] + street_lqueue[car.street]
     # set the light pattern
     cycles = defaultdict()
     cycles_lens = defaultdict()
@@ -113,6 +113,7 @@ class Solution:
     for T in range(D):
         #if verbose:
         #    print("T=",T)
+        has_passed = set() # only one car can pass a trafic light at that timepoint
         for car in cars_copy:
             if car.done: continue
             street = car.street
@@ -123,24 +124,28 @@ class Solution:
             L = street_map[street][3]
             if car.time == L:
                 street_lqueue[street] += [car]
-            # see if it is waiting for the light
-            if len(street_lqueue[street]) > 0 and car == street_lqueue[street][0]:
-                # move car to next street, if possible, otherwise it waits
-                if is_light_on(street,T):
-                    street_lqueue[street] = street_lqueue[street][1:]
-                    #print("path",car.path)
-                    if len(car.path) == 1:
-                        # car is done! add to score
-                        #if verbose:
-                        #    print("car is done!",score)
-                        car.done = True
-                        score += F + D - T
-                    else:
-                        new_street = car.path[1][0]
-                        #print("moving car from",street,"to",new_street)
-                        car.path = car.path[1:] # modifies the car path..
-                        car.street = car.path[0][0]
-                        car.time = 0
+            if car.time >= L:
+                # see if it is waiting for the light
+                if len(street_lqueue[street]) > 0 and car == street_lqueue[street][0]:
+                    # move car to next street, if possible, otherwise it waits
+                    if street in has_passed: 
+                        # another car already passed, skip
+                        continue
+                    if is_light_on(street,T):
+                        street_lqueue[street] = street_lqueue[street][1:]
+                        has_passed.add(street)
+                        if len(car.path) == 1:
+                            # car is done! add to score
+                            #if verbose:
+                            #    print("car is done!",score)
+                            car.done = True
+                            score += F + D - T
+                        else:
+                            new_street = car.path[1][0]
+                            #print("moving car from",street,"to",new_street)
+                            car.path = car.path[1:] # modifies the car path (but it's a copy)
+                            car.street = car.path[0][0]
+                            car.time = 0
     return score
             
 
