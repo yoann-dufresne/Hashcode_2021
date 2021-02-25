@@ -209,6 +209,11 @@ def fuzzer(solution, prob=25, maxdelta=1):
         delta = random.randint(0,maxdelta)
         streets[i] = (streets[i][0], max(1, streets[i][1] + (1-2*sub) * delta))
 
+# Change a single traffic light time (given intersection idx and street name)
+def edit_singletl_time(solution, intidx, streetname, value):
+  for i in range(len(solution.cycles[intidx])):
+    if solution.cycles[intidx][i][0] == streetname:
+      solution.cycles[intidx][i] = (solution.cycles[intidx][i][0], solution.cycles[intidx][i][1] + value)
 
 
 def main():
