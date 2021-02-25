@@ -111,8 +111,8 @@ class Solution:
     # now advance cars whenever possible
     score = 0
     for T in range(D):
-        if verbose:
-            print("T=",T)
+        #if verbose:
+        #    print("T=",T)
         for car in cars_copy:
             if car.done: continue
             street = car.street
@@ -131,8 +131,8 @@ class Solution:
                     #print("path",car.path)
                     if len(car.path) == 1:
                         # car is done! add to score
-                        if verbose:
-                            print("car is done!",score)
+                        #if verbose:
+                        #    print("car is done!",score)
                         car.done = True
                         score += F + D - T
                     else:
@@ -144,6 +144,8 @@ class Solution:
     return score
             
 
+  def __str__(self):
+    return f"{self.score} {self.best_score} - {self.cycles}"
 
   def save(self):
     global overall_best_score
@@ -198,6 +200,17 @@ def greedy_cars():
   return sol
 
 
+# Change the time of each traffic light with probability prob. Adding or subtracting is equally probable (coin flip). The value is chosen in [0,maxdelta] (uniform)
+def fuzzer(solution, prob=25, maxdelta=1):
+  for intidx, streets in solution.cycles.items():
+    for i in range(len(streets)):
+      if random.randint(1,100) <= prob: # do the change
+        sub = random.randint(1,2) == 1
+        delta = random.randint(0,maxdelta)
+        streets[i] = (streets[i][0], max(1, streets[i][1] + (1-2*sub) * delta))
+
+
+
 def main():
   greedy_cars()
   sol = greedy_cars()
@@ -219,7 +232,10 @@ def main():
     G.add_edge(sinter, einter, data = Street(name, length))
 
 
-
+  sol = naive_solution()
+  #print(sol)
+  fuzzer(sol, prob=100, maxdelta=5)
+  #print(sol)
 
 
 
