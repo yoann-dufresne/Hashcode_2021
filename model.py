@@ -13,10 +13,10 @@ class TrafficLight:
 class Intersection: # node
     def __init__(self, idx):
         self.idx = idx
-        self.tl = TrafficLight(0)
-        self.queue = []
 
 class Street: # edge - maybe useless
     def __init__(self, name, length):
         self.name = name
         self.length = length
+        self.queue = []
+        self.tl = TrafficLight(0)

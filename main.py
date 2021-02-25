@@ -125,7 +125,7 @@ def main():
     G.add_node(inter_idx, data = Intersection(inter_idx))
   # Edges:
   for sinter, einter, name, length in streets:
-    G.add_edge(sinter, einter, label = name, weight = length)
+    G.add_edge(sinter, einter, data = Intersection(name, length))
 
 
 
