@@ -9,7 +9,6 @@ class TrafficLight:
     def __init__(self, time):
         self.state = True # T/F: green/red
         self.time = time
-        self.elapsed = 0 # time passed since becoming green
 
 class Intersection: # node
     def __init__(self, idx):
