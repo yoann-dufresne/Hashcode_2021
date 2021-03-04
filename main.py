@@ -8,6 +8,7 @@ import networkx as nx
 from collections import defaultdict
 from copy import deepcopy
 from model import *
+from ricsim import RicSim
 
 
 overall_best_score = 0
@@ -78,10 +79,15 @@ class Solution:
   def __init__(self):
     self.score = 0
     self.best_score = 0
-
     self.cycles = {}
 
   def get_score(self,verbose=False):
+    global intersections,street_map,cars,F,D
+    ricsim = RicSim(intersections,street_map,cars,F)
+    score = ricsim.simulate(self.cycles,D)
+    return score
+
+  def get_score_rayan(self,verbose=False):
     # gather queue at each street extremity
     street_lqueue = defaultdict(list)
     lights = defaultdict()
@@ -157,9 +163,10 @@ class Solution:
   def save(self):
     global overall_best_score
 
-    if self.get_score(verbose=True) >= overall_best_score:
-      print("saved", self.get_score())
-      with open(sys.argv[1] + "_" + str(self.get_score()) + "_.out", "w") as fp:
+    current_score=self.get_score(verbose=True)
+    if current_score >= overall_best_score:
+      print("saved", current_score)
+      with open(sys.argv[1] + "_" + str(current_score) + "_.out", "w") as fp:
         print(len(self.cycles), file=fp)
         for i, cycle in self.cycles.items():
           print(i, file=fp)
@@ -167,7 +174,7 @@ class Solution:
           for street, time in cycle:
             print(street, time, file=fp)
     else:
-      print("not saved", self.get_score())
+      print("not saved", current_score)
 
 
 
